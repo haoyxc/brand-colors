@@ -1,0 +1,1406 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Shape of Colour — a study in 528 palettes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper:   #efe8d4;
+    --paper-2: #e7dfc6;
+    --paper-3: #ddd3b4;
+    --ink:     #18140e;
+    --ink-2:   #50432e;
+    --ink-3:   #8a7a5c;
+    --rule:    #c8b98f;
+    --rule-2:  #d9cca1;
+    --accent:  #c4321c;
+    --accent-2:#2a4a6b;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Fraunces", ui-serif, Georgia, serif;
+    font-variation-settings: "opsz" 14, "SOFT" 30;
+    font-feature-settings: "liga", "kern", "ss01";
+    -webkit-font-smoothing: antialiased;
+    position: relative;
+    overflow-x: hidden;
+  }
+  /* warm paper grain */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100;
+    background-image:
+      radial-gradient(rgba(60,40,10,.22) 1px, transparent 1px),
+      radial-gradient(rgba(60,40,10,.16) 1px, transparent 1px);
+    background-size: 3px 3px, 5px 5px;
+    background-position: 0 0, 1px 2px;
+    mix-blend-mode: multiply;
+    opacity: .35;
+  }
+  /* vignette */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 99;
+    background: radial-gradient(ellipse at center, transparent 55%, rgba(40,25,5,.15) 100%);
+  }
+
+  .mono {
+    font-family: "JetBrains Mono", ui-monospace, Menlo, monospace;
+    font-feature-settings: "tnum";
+  }
+
+  /* ───── layout frame ───── */
+  .frame {
+    max-width: 1480px;
+    margin: 0 auto;
+    padding: 0 56px;
+    position: relative;
+  }
+
+  /* ───── masthead ───── */
+  .masthead {
+    padding: 60px 56px 40px;
+    max-width: 1480px;
+    margin: 0 auto;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .masthead h1 {
+    font-family: "Fraunces", serif;
+    font-size: clamp(40px, 6.4vw, 96px);
+    font-weight: 350;
+    font-variation-settings: "opsz" 144, "SOFT" 50, "WONK" 1;
+    line-height: 0.95;
+    letter-spacing: -0.035em;
+    color: var(--ink);
+    margin: 0;
+  }
+  h1 em {
+    font-style: italic;
+    font-weight: 300;
+    font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
+    color: var(--accent);
+    position: relative;
+    padding: 0 0.02em;
+  }
+  h1 em::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0.08em;
+    height: 2px;
+    background: var(--accent);
+    transform: scaleX(0.4);
+    transform-origin: right;
+    opacity: 0.35;
+  }
+
+
+  /* ───── stats band ───── */
+  .stats-band {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 48px 56px;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    margin: 48px 0 56px;
+    padding: 28px 0;
+  }
+  .stats-band .sb-cell {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+  }
+  .stats-band .sb-n {
+    font-family: "Fraunces", serif;
+    font-size: 64px;
+    font-weight: 300;
+    font-variation-settings: "opsz" 144, "SOFT" 30;
+    letter-spacing: -0.03em;
+    line-height: 0.9;
+  }
+  .stats-band .sb-n.italic {
+    font-style: italic;
+    font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
+    color: var(--accent);
+  }
+  .stats-band .sb-l {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    line-height: 1.45;
+    max-width: 12ch;
+  }
+
+  /* ───── filter bar ───── */
+  .filter-wrap {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(239, 232, 212, 0.94);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--rule);
+  }
+  .filter {
+    max-width: 1480px;
+    margin: 0 auto;
+    padding: 16px 56px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+  }
+  .filter-label {
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-variation-settings: "opsz" 24, "SOFT" 100;
+    font-size: 14px;
+    color: var(--ink-2);
+    margin-right: 14px;
+  }
+  .chip {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.03em;
+    padding: 5px 11px 4px;
+    background: transparent;
+    border: 1px solid var(--rule);
+    color: var(--ink-2);
+    border-radius: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: background 160ms, color 160ms, border-color 160ms, transform 160ms;
+  }
+  .chip:hover { border-color: var(--ink); color: var(--ink); transform: translateY(-1px); }
+  .chip.on {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+  .chip .dot {
+    display: inline-block;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    border: 0.5px solid rgba(0,0,0,0.2);
+  }
+  .chip .count { opacity: 0.6; font-size: 9px; }
+
+  /* ───── plate sections ───── */
+  section {
+    max-width: 1480px;
+    margin: 0 auto;
+    padding: 72px 56px 0;
+  }
+
+  .plate-head {
+    display: flex;
+    align-items: baseline;
+    gap: 24px;
+    margin-bottom: 32px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--rule);
+    flex-wrap: wrap;
+  }
+  .kicker {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    padding-right: 18px;
+    border-right: 1px solid var(--rule);
+    padding-top: 6px;
+  }
+  .plate-head h2 {
+    font-family: "Fraunces", serif;
+    font-size: 44px;
+    font-weight: 400;
+    font-variation-settings: "opsz" 72, "SOFT" 60, "WONK" 1;
+    letter-spacing: -0.025em;
+    line-height: 1;
+  }
+  .plate-head h2 em {
+    font-style: italic;
+    color: var(--accent);
+    font-variation-settings: "opsz" 72, "SOFT" 100, "WONK" 1;
+  }
+  .plate-head .cap {
+    flex: 1;
+    min-width: 240px;
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-variation-settings: "opsz" 14, "SOFT" 100;
+    font-size: 13.5px;
+    color: var(--ink-2);
+    line-height: 1.55;
+    max-width: 52ch;
+    text-align: right;
+  }
+
+  /* ───── duo (two columns) ───── */
+  .duo {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 56px;
+    align-items: start;
+  }
+  .duo > .plate { min-width: 0; }
+  .plate .plate-head {
+    margin-bottom: 24px;
+  }
+  .plate .plate-head h2 { font-size: 32px; }
+
+  /* dominants: top-3 signature colours per industry */
+  .dominants {
+    display: flex;
+    flex-direction: column;
+  }
+  .dominants .dom-row {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 16px;
+    align-items: center;
+    padding: 11px 0;
+    border-bottom: 1px dotted var(--rule-2);
+    cursor: pointer;
+    transition: opacity 220ms;
+  }
+  .dominants .dom-row:last-child { border-bottom: none; }
+  .dominants .dom-row.dim { opacity: 0.2; }
+  .dominants .dom-row:hover .dom-name { color: var(--accent); }
+  .dominants .dom-name {
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-variation-settings: "opsz" 14, "SOFT" 100;
+    font-size: 15px;
+    line-height: 1.15;
+    color: var(--ink);
+    transition: color 200ms;
+  }
+  .dominants .dom-name .sub {
+    display: block;
+    font-family: "JetBrains Mono", monospace;
+    font-style: normal;
+    font-size: 9px;
+    color: var(--ink-3);
+    letter-spacing: 0.1em;
+    margin-top: 4px;
+    text-transform: uppercase;
+  }
+  .dominants .dom-bar {
+    display: flex;
+    height: 56px;
+    border: 0.5px solid rgba(24,20,14,0.3);
+    box-shadow: 0 1px 0 rgba(0,0,0,0.05);
+  }
+  .dominants .dom-seg {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 7px 10px 8px;
+    min-width: 0;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9px;
+    overflow: hidden;
+    transition: flex-grow 240ms cubic-bezier(.2,.7,.2,1);
+    cursor: pointer;
+  }
+  .dominants .dom-row:hover .dom-seg { flex-grow: 1; }
+  .dominants .dom-seg:hover { flex-grow: 2.2 !important; }
+  .dominants .dom-seg .hex {
+    letter-spacing: 0.02em;
+    line-height: 1;
+    opacity: 0.85;
+    white-space: nowrap;
+  }
+  .dominants .dom-seg .pct {
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-variation-settings: "opsz" 48, "SOFT" 100, "WONK" 1;
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 0.85;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+  }
+  .dominants .dom-seg.narrow .hex,
+  .dominants .dom-seg.narrow .pct { opacity: 0; }
+
+  /* rose chart + info panel */
+  .rose-wrap {
+    display: grid;
+    grid-template-columns: 1fr 0.85fr;
+    gap: 32px;
+    align-items: start;
+  }
+  .rose {
+    width: 100%;
+    aspect-ratio: 1;
+    display: block;
+    overflow: visible;
+  }
+  .rose .grid-ring {
+    fill: none;
+    stroke: var(--rule-2);
+    stroke-dasharray: 1 4;
+    stroke-width: 0.7;
+  }
+  .rose .grid-axis {
+    stroke: var(--rule-2);
+    stroke-dasharray: 1 4;
+    stroke-width: 0.6;
+  }
+  .rose .axis-label {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    fill: var(--ink-3);
+  }
+  .rose .wedge {
+    cursor: pointer;
+    stroke-width: 1;
+    transition: opacity 180ms, filter 180ms;
+  }
+  .rose .wedge:hover {
+    filter: brightness(1.08) drop-shadow(0 2px 6px rgba(24,16,4,0.18));
+  }
+  .rose .wedge.dim { opacity: 0.2; }
+  .rose .wedge.pinned {
+    stroke-width: 2.5;
+    stroke: var(--ink);
+    filter: drop-shadow(0 3px 8px rgba(24,16,4,0.25));
+  }
+
+  .rose-panel {
+    display: flex;
+    flex-direction: column;
+    padding-top: 12px;
+    min-height: 0;
+  }
+  .rp-kicker {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+    transition: color 180ms;
+  }
+  .rp-title {
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-variation-settings: "opsz" 72, "SOFT" 100, "WONK" 1;
+    font-size: 44px;
+    font-weight: 400;
+    line-height: 0.85;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+    margin-bottom: 10px;
+    transition: color 220ms;
+  }
+  .rp-stat {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    color: var(--ink-2);
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px dotted var(--rule);
+  }
+  .rp-list {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    max-height: 460px;
+    overflow-y: auto;
+    padding-right: 6px;
+    margin-right: -6px;
+  }
+  .rp-list::-webkit-scrollbar { width: 4px; }
+  .rp-list::-webkit-scrollbar-thumb { background: var(--rule); }
+  .rp-item {
+    display: grid;
+    grid-template-columns: 12px 1fr auto;
+    gap: 10px;
+    align-items: center;
+    padding: 3px 0;
+    border-bottom: 1px dotted transparent;
+    transition: background 140ms;
+  }
+  .rp-item:hover { background: var(--paper-2); }
+  .rp-item .sw {
+    width: 12px;
+    height: 12px;
+    border: 0.5px solid rgba(24,20,14,0.35);
+  }
+  .rp-item .nm {
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-variation-settings: "opsz" 14, "SOFT" 100;
+    font-size: 13px;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .rp-item .hx {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 8.5px;
+    color: var(--ink-3);
+    letter-spacing: 0.02em;
+  }
+  .rp-footer {
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-variation-settings: "opsz" 14, "SOFT" 100;
+    font-size: 11px;
+    color: var(--ink-3);
+    padding-top: 8px;
+    margin-top: 6px;
+    border-top: 1px dotted var(--rule);
+  }
+
+  @media (max-width: 900px) {
+    .rose-wrap { grid-template-columns: 1fr; gap: 24px; }
+  }
+
+  /* ───── specimens (cards) ───── */
+  .gallery { padding-bottom: 120px; }
+  .cards {
+    columns: 4;
+    column-gap: 0;
+    border-top: 1px solid var(--rule);
+    border-left: 1px solid var(--rule);
+  }
+  @media (max-width: 1200px) { .cards { columns: 3; } }
+  @media (max-width: 820px)  { .cards { columns: 2; } }
+  @media (max-width: 520px)  { .cards { columns: 1; } }
+
+  .card {
+    break-inside: avoid;
+    padding: 20px 22px 18px;
+    border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    background: var(--paper);
+    transition: background 180ms;
+    display: block;
+  }
+  .card.hidden { display: none; }
+  .card:hover { background: var(--paper-2); }
+  .card .bn {
+    font-family: "Fraunces", serif;
+    font-size: 20px;
+    font-weight: 400;
+    font-variation-settings: "opsz" 24, "SOFT" 60, "WONK" 1;
+    letter-spacing: -0.015em;
+    line-height: 1.1;
+    color: var(--ink);
+  }
+  .card .bn em {
+    font-style: italic;
+    font-variation-settings: "opsz" 24, "SOFT" 100, "WONK" 1;
+  }
+  .card .ind {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-top: 6px;
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .card .ind .n-colors { color: var(--accent); }
+  .card .palette {
+    display: flex;
+    height: 44px;
+    border: 0.5px solid rgba(24,20,14,0.25);
+  }
+  .card .palette .ch {
+    flex: 1;
+    position: relative;
+    transition: flex 200ms;
+    cursor: pointer;
+  }
+  .card .palette .ch:hover { flex: 3; }
+  .card .palette .ch::after {
+    content: attr(data-hex);
+    position: absolute;
+    left: 50%;
+    top: 100%;
+    transform: translateX(-50%);
+    margin-top: 4px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9px;
+    color: var(--ink-2);
+    opacity: 0;
+    transition: opacity 140ms;
+    white-space: nowrap;
+  }
+  .card .palette .ch:hover::after { opacity: 1; }
+  .card .hexes {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9px;
+    letter-spacing: 0.02em;
+    color: var(--ink-3);
+    margin-top: 18px;
+    line-height: 1.55;
+    word-break: break-all;
+  }
+
+  /* ───── detail view (single industry) ───── */
+  #detail-view {
+    max-width: 1480px;
+    margin: 0 auto;
+    padding: 56px 56px 120px;
+  }
+
+  .detail-back {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin-bottom: 40px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: color 180ms, gap 180ms;
+  }
+  .detail-back:hover { color: var(--accent); gap: 14px; }
+
+  .detail-masthead {
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 48px;
+  }
+  .detail-name {
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
+    font-size: clamp(44px, 6.8vw, 104px);
+    font-weight: 350;
+    line-height: 0.88;
+    letter-spacing: -0.035em;
+    color: var(--accent);
+    margin-top: 12px;
+  }
+  .detail-name .period {
+    color: var(--ink);
+    font-style: normal;
+  }
+  .detail-stats {
+    display: flex;
+    gap: 40px;
+    align-items: baseline;
+    padding-bottom: 12px;
+  }
+  .detail-stats .s {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    border-left: 1px solid var(--rule);
+    padding-left: 18px;
+  }
+  .detail-stats .s:first-child { border-left: none; padding-left: 0; }
+  .detail-stats .n {
+    font-family: "Fraunces", serif;
+    font-size: 46px;
+    font-weight: 300;
+    font-variation-settings: "opsz" 144, "SOFT" 50;
+    line-height: 0.9;
+    letter-spacing: -0.03em;
+  }
+  .detail-stats .n.italic {
+    font-style: italic;
+    font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
+    color: var(--accent);
+  }
+  .detail-stats .l {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  /* detail rose */
+  .detail-rose {
+    margin-bottom: 72px;
+    grid-template-columns: 1.1fr 1fr;
+  }
+  .detail-rose .rose-panel { padding-top: 24px; }
+  .detail-rose .rp-title { font-size: 52px; }
+
+  /* hero: dominant clusters, large */
+  .detail-hero {
+    display: flex;
+    height: 260px;
+    margin-bottom: 72px;
+    border: 0.5px solid rgba(24,20,14,0.3);
+    box-shadow: 0 3px 0 rgba(0,0,0,0.04), 0 1px 0 rgba(255,255,255,0.4) inset;
+  }
+  .detail-hero .block {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 26px 30px 28px;
+    overflow: hidden;
+    transition: flex-grow 360ms cubic-bezier(.2,.7,.2,1);
+    cursor: default;
+  }
+  .detail-hero .block:hover { flex-grow: 1.4; }
+  .detail-hero .block .hex-tag {
+    position: absolute;
+    top: 22px;
+    left: 30px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    opacity: 0.78;
+  }
+  .detail-hero .block .big-pct {
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-variation-settings: "opsz" 144, "SOFT" 100, "WONK" 1;
+    font-size: clamp(56px, 7vw, 96px);
+    font-weight: 300;
+    line-height: 0.82;
+    letter-spacing: -0.035em;
+    margin-bottom: 10px;
+    white-space: nowrap;
+  }
+  .detail-hero .block .big-pct .sign {
+    font-size: 0.42em;
+    opacity: 0.7;
+    font-style: italic;
+    margin-left: 2px;
+  }
+  .detail-hero .block .label {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.82;
+    white-space: nowrap;
+  }
+  .detail-hero .block.narrow .big-pct,
+  .detail-hero .block.narrow .label { opacity: 0; }
+
+  .detail-brands-title {
+    font-family: "Fraunces", serif;
+    font-size: 32px;
+    font-weight: 400;
+    font-variation-settings: "opsz" 72, "SOFT" 60, "WONK" 1;
+    letter-spacing: -0.02em;
+    margin-bottom: 28px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .detail-brands-title em {
+    font-style: italic;
+    color: var(--accent);
+    font-variation-settings: "opsz" 72, "SOFT" 100, "WONK" 1;
+  }
+  .detail-brands-title .dbkick {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  .detail-brands {
+    columns: 3;
+    column-gap: 0;
+    border-top: 1px solid var(--rule);
+    border-left: 1px solid var(--rule);
+  }
+  @media (max-width: 1100px) { .detail-brands { columns: 2; } }
+  @media (max-width: 640px)  { .detail-brands { columns: 1; } }
+  .dbc {
+    break-inside: avoid;
+    border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    padding: 24px 26px 22px;
+    background: var(--paper);
+    transition: background 180ms;
+  }
+  .dbc:hover { background: var(--paper-2); }
+  .dbc .dbn {
+    font-family: "Fraunces", serif;
+    font-size: 24px;
+    font-weight: 400;
+    font-variation-settings: "opsz" 24, "SOFT" 60, "WONK" 1;
+    letter-spacing: -0.015em;
+    line-height: 1.1;
+    margin-bottom: 16px;
+    color: var(--ink);
+  }
+  .dbc .dbn em {
+    font-style: italic;
+    color: var(--accent);
+    font-variation-settings: "opsz" 24, "SOFT" 100, "WONK" 1;
+  }
+  .dbc .dbp {
+    display: flex;
+    height: 72px;
+    border: 0.5px solid rgba(24,20,14,0.25);
+    margin-bottom: 14px;
+  }
+  .dbc .dbp .c {
+    flex: 1;
+    position: relative;
+    cursor: pointer;
+    transition: flex 220ms;
+  }
+  .dbc .dbp .c:hover { flex: 2.5; }
+  .dbc .dbp .c::after {
+    content: attr(data-hex);
+    position: absolute;
+    left: 50%;
+    bottom: 6px;
+    transform: translateX(-50%);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9px;
+    color: rgba(255,255,255,0.95);
+    text-shadow: 0 0 4px rgba(0,0,0,0.55);
+    opacity: 0;
+    transition: opacity 140ms;
+    white-space: nowrap;
+  }
+  .dbc .dbp .c:hover::after { opacity: 1; }
+  .dbc .dbh {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.02em;
+    color: var(--ink-3);
+    line-height: 1.55;
+    word-break: break-all;
+  }
+
+  /* ───── colophon ───── */
+  .colophon {
+    max-width: 1480px;
+    margin: 0 auto;
+    padding: 40px 56px 80px;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .colophon .side {
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-variation-settings: "opsz" 14, "SOFT" 100;
+    font-size: 13px;
+    color: var(--ink-2);
+  }
+  .colophon .mono-side {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  /* ───── responsive ───── */
+  @media (max-width: 1100px) {
+    .duo { grid-template-columns: 1fr; gap: 72px; }
+  }
+  @media (max-width: 820px) {
+    .masthead, section, .colophon, .top-strip, .filter { padding-left: 24px; padding-right: 24px; }
+    .plate-head .cap { text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <h1>The shape of <em>colour.</em></h1>
+</header>
+
+<div class="filter-wrap">
+  <div class="filter" id="filter">
+    <span class="filter-label">Filter by industry</span>
+  </div>
+</div>
+
+<div id="main-view">
+<section>
+  <div class="duo">
+    <div class="plate">
+      <div id="dominants" class="dominants"></div>
+    </div>
+    <div class="plate">
+      <div class="rose-wrap">
+        <svg id="rose" class="rose"></svg>
+        <div class="rose-panel" id="rose-panel"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="stats-band" id="stats-band-main"></div>
+</section>
+
+<section class="gallery">
+  <div class="cards" id="cards"></div>
+</section>
+</div>
+
+<div id="detail-view" style="display:none"></div>
+
+<div class="colophon">
+  <span class="side"><em>Data drawn from</em> brandcolors.net &middot; 528 brands, 23 industries, one long afternoon of HSL.</span>
+  <span class="mono-side">Set in Fraunces &amp; JetBrains Mono</span>
+</div>
+
+<script src="brands.js"></script>
+<script>
+// ───── color math ─────
+function hexToRgb(hex){
+  hex = hex.replace('#','');
+  if (hex.length === 3) hex = hex.split('').map(c=>c+c).join('');
+  return [parseInt(hex.slice(0,2),16), parseInt(hex.slice(2,4),16), parseInt(hex.slice(4,6),16)];
+}
+function rgbToHsl(r,g,b){
+  r/=255; g/=255; b/=255;
+  const max=Math.max(r,g,b), min=Math.min(r,g,b);
+  let h=0, s=0, l=(max+min)/2;
+  if (max!==min){
+    const d=max-min;
+    s = l>0.5 ? d/(2-max-min) : d/(max+min);
+    switch(max){
+      case r: h=(g-b)/d + (g<b?6:0); break;
+      case g: h=(b-r)/d + 2; break;
+      case b: h=(r-g)/d + 4; break;
+    }
+    h*=60;
+  }
+  return [h, s, l];
+}
+function hexToHsl(hex){ const [r,g,b]=hexToRgb(hex); return rgbToHsl(r,g,b); }
+
+// ───── data shapes ─────
+const FLAT = [];
+const BY_IND = {};
+brands.forEach(b => {
+  if (!BY_IND[b.industry]) BY_IND[b.industry] = { brands: [], colors: [] };
+  BY_IND[b.industry].brands.push(b);
+  b.colors.forEach(c => {
+    const [h,s,l] = hexToHsl(c.hex);
+    const rec = { brand: b.name, industry: b.industry, hex: c.hex.toUpperCase(), name: c.name, h, s, l };
+    FLAT.push(rec);
+    BY_IND[b.industry].colors.push(rec);
+  });
+});
+const INDUSTRIES = Object.keys(BY_IND);
+
+// ───── histograms ─────
+function histogram(colors){
+  const bins = new Array(12).fill(0);
+  let gray = 0;
+  colors.forEach(c => {
+    if (c.s < 0.12) { gray++; return; }
+    const idx = Math.round(c.h / 30) % 12;
+    bins[idx]++;
+  });
+  return { bins, gray, total: colors.length };
+}
+const BIN_NAMES  = ['red','orange','yellow','lime','green','mint','cyan','azure','blue','violet','magenta','pink'];
+const BIN_LABELS = ['0°','30°','60°','90°','120°','150°','180°','210°','240°','270°','300°','330°','◐'];
+const ALL_HIST = histogram(FLAT);
+const IND_HIST = {};
+INDUSTRIES.forEach(i => { IND_HIST[i] = histogram(BY_IND[i].colors); });
+
+function dominantHue(h){ return h.bins.indexOf(Math.max(...h.bins)) * 30; }
+const IND_HUE = {};
+INDUSTRIES.forEach(i => { IND_HUE[i] = dominantHue(IND_HIST[i]); });
+
+const sortedIndustries = [...INDUSTRIES].sort((a,b) => IND_HUE[a] - IND_HUE[b]);
+
+// ───── stats band renderer ─────
+function renderStats(el, ind){
+  if (!el) return;
+  let cells;
+  if (ind === null || ind === undefined) {
+    cells = [
+      { n: brands.length.toLocaleString(), l: 'brands<br>surveyed' },
+      { n: FLAT.length.toLocaleString(), l: 'hex<br>codes' },
+      { n: INDUSTRIES.length, l: 'industries<br>sliced' },
+      { n: BIN_NAMES[ALL_HIST.bins.indexOf(Math.max(...ALL_HIST.bins))], l: 'the loudest<br>hue of all', italic: true }
+    ];
+  } else {
+    const data = BY_IND[ind];
+    const uniqueHex = new Set(data.colors.map(c => c.hex.toUpperCase()));
+    const hist = IND_HIST[ind];
+    const topBinIdx = hist.bins.indexOf(Math.max(...hist.bins));
+    const loudest = BIN_NAMES[topBinIdx];
+    const avg = (data.colors.length / data.brands.length).toFixed(1);
+    cells = [
+      { n: data.brands.length, l: 'brands<br>surveyed' },
+      { n: uniqueHex.size, l: 'hex<br>codes' },
+      { n: avg, l: 'colours<br>per brand' },
+      { n: loudest, l: `the loudest<br>hue in ${ind.toLowerCase()}`, italic: true }
+    ];
+  }
+  el.innerHTML = cells.map(c => `
+    <div class="sb-cell">
+      <div class="sb-n${c.italic ? ' italic' : ''}">${c.n}</div>
+      <div class="sb-l">${c.l}</div>
+    </div>
+  `).join('');
+}
+renderStats(document.getElementById('stats-band-main'), null);
+
+// ───── filter state ─────
+let active = null;
+function setIndustry(ind){
+  active = ind;
+  Object.entries(chips).forEach(([k,el]) => {
+    el.classList.toggle('on', (ind === null && k === '__all__') || k === ind);
+  });
+  const mainView = document.getElementById('main-view');
+  const detailView = document.getElementById('detail-view');
+  if (ind === null) {
+    mainView.style.display = '';
+    detailView.style.display = 'none';
+    detailView.innerHTML = '';
+  } else {
+    renderDetail(ind);
+    mainView.style.display = 'none';
+    detailView.style.display = 'block';
+  }
+}
+window.setIndustry = setIndustry;
+
+// ───── filter chips ─────
+const filter = document.getElementById('filter');
+const chips = {};
+const allBtn = document.createElement('button');
+allBtn.className = 'chip on';
+allBtn.innerHTML = `All <span class="count">${brands.length}</span>`;
+allBtn.onclick = () => setIndustry(null);
+filter.appendChild(allBtn);
+chips.__all__ = allBtn;
+
+sortedIndustries.forEach(ind => {
+  const btn = document.createElement('button');
+  btn.className = 'chip';
+  const hue = IND_HUE[ind];
+  btn.innerHTML = `<span class="dot" style="background:hsl(${hue},60%,52%)"></span>${ind}<span class="count">${BY_IND[ind].brands.length}</span>`;
+  btn.onclick = () => setIndustry(active === ind ? null : ind);
+  filter.appendChild(btn);
+  chips[ind] = btn;
+});
+
+// ───── dominants: cluster each industry's brand-signatures, show top 3 ─────
+function dominantColor(brand){
+  let best = null;
+  brand.colors.forEach(c => {
+    const [h,s,l] = hexToHsl(c.hex);
+    if (!best || s > best.s) best = { hex: c.hex.toUpperCase(), h, s, l };
+  });
+  return best;
+}
+
+function clusterKey(c){
+  if (c.s < 0.12) {
+    if (c.l < 0.25) return 'black';
+    if (c.l < 0.55) return 'gray-d';
+    if (c.l < 0.8)  return 'gray-l';
+    return 'white';
+  }
+  const hBin = Math.floor(c.h / 20) * 20;
+  const lt = c.l < 0.3 ? 'd' : c.l < 0.6 ? 'm' : 'l';
+  return hBin + '-' + lt;
+}
+
+function meanHex(members){
+  let r=0,g=0,b=0;
+  members.forEach(m => {
+    const [mr,mg,mb] = hexToRgb(m.hex);
+    r += mr; g += mg; b += mb;
+  });
+  const n = members.length;
+  return '#' + [r,g,b]
+    .map(v => Math.round(v/n).toString(16).padStart(2,'0'))
+    .join('').toUpperCase();
+}
+
+function clusterBrandDoms(brands){
+  const map = new Map();
+  brands.forEach(b => {
+    const d = dominantColor(b);
+    const k = clusterKey(d);
+    if (!map.has(k)) map.set(k, []);
+    map.get(k).push(d);
+  });
+  const out = [];
+  map.forEach((members, k) => {
+    out.push({ key: k, count: members.length, hex: meanHex(members) });
+  });
+  return out.sort((a,b) => b.count - a.count);
+}
+
+function labelFor(hex){
+  const [r,g,b] = hexToRgb(hex);
+  const lum = (0.299*r + 0.587*g + 0.114*b) / 255;
+  return lum > 0.58 ? '#18140e' : '#f5f1e0';
+}
+
+const domEl = document.getElementById('dominants');
+const TOP_N = 3;
+
+sortedIndustries.forEach(ind => {
+  const data = BY_IND[ind];
+  const clusters = clusterBrandDoms(data.brands);
+  const top = clusters.slice(0, TOP_N);
+  const topSum = top.reduce((s,c) => s + c.count, 0);
+  const totalBrands = data.brands.length;
+
+  const row = document.createElement('div');
+  row.className = 'dom-row';
+  row.dataset.ind = ind;
+  row.onclick = () => setIndustry(active === ind ? null : ind);
+
+  const name = document.createElement('div');
+  name.className = 'dom-name';
+  name.innerHTML = `${ind}<span class="sub">${totalBrands} brands</span>`;
+
+  const bar = document.createElement('div');
+  bar.className = 'dom-bar';
+  top.forEach(c => {
+    const seg = document.createElement('div');
+    seg.className = 'dom-seg';
+    const flex = c.count / topSum;
+    seg.style.flex = flex;
+    seg.style.background = c.hex;
+    seg.style.color = labelFor(c.hex);
+    const pct = Math.round((c.count / totalBrands) * 100);
+    seg.innerHTML = `
+      <span class="hex">${c.hex}</span>
+      <span class="pct">${pct}<span style="font-size:.55em; opacity:.7">%</span></span>
+    `;
+    if (flex < 0.16) seg.classList.add('narrow');
+    seg.setAttribute('title', `${c.hex} — ${c.count} of ${totalBrands} brands (${pct}%)`);
+    bar.appendChild(seg);
+  });
+
+  row.appendChild(name);
+  row.appendChild(bar);
+  domEl.appendChild(row);
+});
+
+// ───── detail view renderer ─────
+function renderDetail(ind){
+  const data = BY_IND[ind];
+  const totalBrands = data.brands.length;
+  const uniqueHex = new Set(data.colors.map(c => c.hex.toUpperCase()));
+  const hist = IND_HIST[ind];
+  const topBinIdx = hist.bins.indexOf(Math.max(...hist.bins));
+  const loudest = hist.gray > hist.bins[topBinIdx] ? 'gray' : BIN_NAMES[topBinIdx];
+
+  // sort brands for the roster: by dominant hue so the grid reads smoothly
+  const sorted = [...data.brands].map(b => ({ ...b, dom: dominantColor(b) }))
+    .sort((a,b) => {
+      const ag = a.dom.s < 0.12, bg = b.dom.s < 0.12;
+      if (ag && !bg) return 1;
+      if (!ag && bg) return -1;
+      if (ag && bg) return b.dom.l - a.dom.l;
+      return a.dom.h - b.dom.h;
+    });
+
+  const brandsHtml = sorted.map(b => {
+    const chips = [...b.colors].sort((x,y) => hexToHsl(y.hex)[2] - hexToHsl(x.hex)[2]);
+    const parts = b.name.split(' ');
+    const nameHtml = parts.length > 1
+      ? `${parts[0]} <em>${parts.slice(1).join(' ')}</em>`
+      : b.name;
+    return `
+      <div class="dbc">
+        <div class="dbn">${nameHtml}</div>
+        <div class="dbp">
+          ${chips.map(c => `<div class="c" style="background:${c.hex}" data-hex="${c.hex.toUpperCase()}"></div>`).join('')}
+        </div>
+        <div class="dbh">${chips.map(c => c.hex.toUpperCase()).join('  ·  ')}</div>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('detail-view').innerHTML = `
+    <button class="detail-back" onclick="setIndustry(null)">← back to all industries</button>
+    <div class="detail-rose rose-wrap">
+      <svg class="rose" id="detail-rose-svg"></svg>
+      <div class="rose-panel" id="detail-rose-panel"></div>
+    </div>
+    <div class="stats-band" id="stats-band-detail"></div>
+    <h3 class="detail-brands-title"><span>The <em>${totalBrands}</em> brands</span><span class="dbkick">sorted by hue</span></h3>
+    <div class="detail-brands">${brandsHtml}</div>
+  `;
+
+  renderStats(document.getElementById('stats-band-detail'), ind);
+
+  buildRose(
+    document.getElementById('detail-rose-svg'),
+    document.getElementById('detail-rose-panel'),
+    data.colors,
+    totalBrands,
+    {
+      kicker: `${ind} · hue distribution`,
+      title: `The <em style="color:var(--accent)">${ind}</em><br>palette.`,
+      footer: `Hover a wedge to see the ${ind.toLowerCase()} brands whose colours live in it.`
+    }
+  );
+}
+
+// ───── rose chart (reusable) ─────
+const NS2 = 'http://www.w3.org/2000/svg';
+function sv(tag, attrs, text){
+  const el = document.createElementNS(NS2, tag);
+  for (const k in attrs) el.setAttribute(k, attrs[k]);
+  if (text != null) el.textContent = text;
+  return el;
+}
+function polar(angleDeg, r){
+  const a = (angleDeg - 90) * Math.PI / 180;
+  return [Math.cos(a) * r, Math.sin(a) * r];
+}
+
+function buildRose(roseEl, panelEl, colors, brandsCount, opts = {}){
+  // reset
+  roseEl.innerHTML = '';
+  // replace the svg element by cloning to detach any prior listeners
+  const newRose = roseEl.cloneNode(false);
+  roseEl.parentNode.replaceChild(newRose, roseEl);
+  roseEl = newRose;
+
+  let pinned = null;
+
+  const RV = 640;
+  roseEl.setAttribute('viewBox', `-${RV/2} -${RV/2} ${RV} ${RV}`);
+
+  const bins = Array.from({length: 12}, () => []);
+  const grayList = [];
+  colors.forEach(c => {
+    if (c.s < 0.12) { grayList.push(c); return; }
+    const idx = Math.round(c.h / 30) % 12;
+    bins[idx].push(c);
+  });
+  const maxBin = Math.max(1, ...bins.map(b => b.length));
+  const R_MAX = 232;
+
+  // reference rings
+  [0.25, 0.5, 0.75, 1].forEach(f => {
+    roseEl.appendChild(sv('circle', { cx: 0, cy: 0, r: R_MAX * f, class: 'grid-ring' }));
+  });
+
+  // axis spokes
+  for (let i = 0; i < 12; i++) {
+    const ang = (i * 30 - 90) * Math.PI / 180;
+    roseEl.appendChild(sv('line', {
+      x1: 0, y1: 0,
+      x2: Math.cos(ang) * R_MAX,
+      y2: Math.sin(ang) * R_MAX,
+      class: 'grid-axis'
+    }));
+  }
+
+  // wedges
+  for (let i = 0; i < 12; i++) {
+    const bin = bins[i];
+    if (bin.length === 0) continue;
+    const r = Math.sqrt(bin.length / maxBin) * R_MAX;
+    const centerDeg = i * 30;
+    const [x1, y1] = polar(centerDeg - 15, r);
+    const [x2, y2] = polar(centerDeg + 15, r);
+    const d = `M 0 0 L ${x1.toFixed(2)} ${y1.toFixed(2)} A ${r.toFixed(2)} ${r.toFixed(2)} 0 0 1 ${x2.toFixed(2)} ${y2.toFixed(2)} Z`;
+    const hue = centerDeg;
+    const wedge = sv('path', {
+      d,
+      class: 'wedge',
+      'data-bin': i,
+      fill: `hsl(${hue}, 62%, 54%)`,
+      stroke: `hsl(${hue}, 55%, 34%)`
+    });
+    wedge.addEventListener('mouseenter', () => {
+      if (pinned === null) updatePanel(i);
+    });
+    wedge.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (pinned === i) { pinned = null; updatePanel(null); }
+      else { pinned = i; updatePanel(i); }
+    });
+    roseEl.appendChild(wedge);
+  }
+
+  // labels
+  for (let i = 0; i < 12; i++) {
+    const mid = i * 30;
+    const [lx, ly] = polar(mid, R_MAX + 30);
+    roseEl.appendChild(sv('text', {
+      x: lx.toFixed(1), y: ly.toFixed(1),
+      'text-anchor': 'middle',
+      'dominant-baseline': 'middle',
+      class: 'axis-label'
+    }, BIN_NAMES[i]));
+  }
+
+  roseEl.addEventListener('mouseleave', () => {
+    if (pinned === null) updatePanel(null);
+    else updatePanel(pinned);
+  });
+
+  function updatePanel(binIdx){
+    roseEl.querySelectorAll('.wedge').forEach(w => {
+      const on = binIdx === null || +w.dataset.bin === binIdx;
+      w.classList.toggle('dim', !on);
+      w.classList.toggle('pinned', pinned !== null && +w.dataset.bin === pinned);
+    });
+
+    if (binIdx === null) {
+      panelEl.innerHTML = `
+        <div class="rp-kicker">${opts.kicker || 'Hue distribution'}</div>
+        <div class="rp-title">${opts.title || 'Twelve<br>hues.'}</div>
+        <div class="rp-stat">${colors.length} colours · ${grayList.length} grayscale · ${brandsCount} brand${brandsCount!==1?'s':''}</div>
+        <div class="rp-list">
+          ${bins.map((b, i) => {
+            const hue = i * 30;
+            return `
+              <div class="rp-item" data-bin="${i}">
+                <div class="sw" style="background:hsl(${hue},62%,54%); border-color:hsl(${hue},50%,30%)"></div>
+                <div class="nm" style="text-transform:capitalize">${BIN_NAMES[i]}</div>
+                <div class="hx">${b.length}</div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+        <div class="rp-footer">${opts.footer || 'Hover a wedge to see every brand whose colour lives in that slice of the spectrum.'}</div>
+      `;
+      panelEl.querySelectorAll('.rp-item').forEach(el => {
+        el.addEventListener('mouseenter', () => {
+          if (pinned === null) updatePanel(+el.dataset.bin);
+        });
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const bin = +el.dataset.bin;
+          if (pinned === bin) { pinned = null; updatePanel(null); }
+          else { pinned = bin; updatePanel(bin); }
+        });
+      });
+    } else {
+      const bin = bins[binIdx];
+      const hue = binIdx * 30;
+      const brandSet = new Map();
+      bin.forEach(c => {
+        if (!brandSet.has(c.brand)) brandSet.set(c.brand, []);
+        brandSet.get(c.brand).push(c);
+      });
+      const entries = [...brandSet.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+      const accent = `hsl(${hue}, 55%, 40%)`;
+      const pinnedTag = pinned === binIdx
+        ? `<span style="color:${accent}; font-style:italic; margin-left:8px">· pinned, click again to release</span>`
+        : '';
+
+      panelEl.innerHTML = `
+        <div class="rp-title" style="color:${accent}; text-transform:capitalize">${BIN_NAMES[binIdx]}.</div>
+        <div class="rp-stat">${bin.length} colour${bin.length!==1?'s':''} from ${entries.length} brand${entries.length!==1?'s':''}${pinnedTag}</div>
+        <div class="rp-list">
+          ${entries.map(([brand, cs]) => {
+            const top = cs[0];
+            return `
+              <div class="rp-item">
+                <div class="sw" style="background:${top.hex}"></div>
+                <div class="nm">${brand}</div>
+                <div class="hx">${top.hex}</div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+  }
+
+  updatePanel(null);
+}
+
+// main-view rose: every colour, every brand
+buildRose(
+  document.getElementById('rose'),
+  document.getElementById('rose-panel'),
+  FLAT,
+  brands.length
+);
+
+// ───── specimen cards ─────
+function sortKey(b){
+  let best = null;
+  b.colors.forEach(c => {
+    const [h,s,l] = hexToHsl(c.hex);
+    if (!best || s > best.s) best = {h,s,l};
+  });
+  if (best.s < 0.12) return 360 + best.l*100;
+  return best.h;
+}
+const sortedBrands = [...brands].sort((a,b) => sortKey(a) - sortKey(b));
+const cardsEl = document.getElementById('cards');
+
+sortedBrands.forEach(b => {
+  const chips = [...b.colors].sort((a,bb) => hexToHsl(bb.hex)[2] - hexToHsl(a.hex)[2]);
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.dataset.ind = b.industry;
+
+  const nameParts = b.name.split(' ');
+  const nameHtml = nameParts.length > 1
+    ? `${nameParts[0]} <em>${nameParts.slice(1).join(' ')}</em>`
+    : b.name;
+
+  card.innerHTML = `
+    <div class="bn">${nameHtml}</div>
+    <div class="ind"><span>${b.industry}</span><span class="n-colors">${b.colors.length} hues</span></div>
+    <div class="palette">
+      ${chips.map(c => `<div class="ch" data-hex="${c.hex.toUpperCase()}" style="background:${c.hex}"></div>`).join('')}
+    </div>
+    <div class="hexes">${chips.map(c => c.hex.toUpperCase()).join('  ·  ')}</div>
+  `;
+  cardsEl.appendChild(card);
+});
+</script>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>The Shape of Colour — a study in 528 palettes</title>
+<title>The Color in Popular Brands</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -845,12 +845,44 @@
     .masthead, section, .colophon, .top-strip, .filter { padding-left: 24px; padding-right: 24px; }
     .plate-head .cap { text-align: left; }
   }
+
+  /* ───── brand logo tip ───── */
+  #logo-tip {
+    position: fixed;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 12px 7px 7px;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    box-shadow: 3px 4px 0 rgba(24,20,14,0.12);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 120ms;
+  }
+  #logo-tip.on { opacity: 1; }
+  #logo-tip img {
+    width: 44px;
+    height: 44px;
+    object-fit: contain;
+    background: #fff;
+    border: 0.5px solid rgba(24,20,14,0.25);
+    padding: 4px;
+  }
+  #logo-tip span {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
 </style>
 </head>
 <body>
 
 <header class="masthead">
-  <h1>The shape of <em>colour.</em></h1>
+  <h1>The color in <em>popular brands.</em></h1>
 </header>
 
 <div class="filter-wrap">
@@ -1153,7 +1185,7 @@ function renderDetail(ind){
       ? `${parts[0]} <em>${parts.slice(1).join(' ')}</em>`
       : b.name;
     return `
-      <div class="dbc">
+      <div class="dbc" data-brand="${escAttr(b.name)}">
         <div class="dbn">${nameHtml}</div>
         <div class="dbp">
           ${chips.map(c => `<div class="c" style="background:${c.hex}" data-hex="${c.hex.toUpperCase()}"></div>`).join('')}
@@ -1344,7 +1376,7 @@ function buildRose(roseEl, panelEl, colors, brandsCount, opts = {}){
           ${entries.map(([brand, cs]) => {
             const top = cs[0];
             return `
-              <div class="rp-item">
+              <div class="rp-item" data-brand="${escAttr(brand)}">
                 <div class="sw" style="background:${top.hex}"></div>
                 <div class="nm">${brand}</div>
                 <div class="hx">${top.hex}</div>
@@ -1385,6 +1417,7 @@ sortedBrands.forEach(b => {
   const card = document.createElement('div');
   card.className = 'card';
   card.dataset.ind = b.industry;
+  card.dataset.brand = b.name;
 
   const nameParts = b.name.split(' ');
   const nameHtml = nameParts.length > 1
@@ -1401,6 +1434,81 @@ sortedBrands.forEach(b => {
   `;
   cardsEl.appendChild(card);
 });
+
+// ───── brand logo on hover ─────
+function escAttr(s){ return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;'); }
+
+const DOMAIN_OVERRIDES = {
+  "HBO Max":"max.com", "Apple Music":"apple.com", "Apple Health":"apple.com",
+  "Cash App":"cash.app", "Shopify Plus":"shopify.com",
+  "Delta Airlines":"delta.com", "United Airlines":"united.com",
+  "American Airlines":"aa.com", "Southwest Airlines":"southwest.com",
+  "Singapore Airlines":"singaporeair.com", "Hyatt Hotels":"hyatt.com",
+  "Arc Browser":"arc.net", "Khan Academy":"khanacademy.org",
+  "Canvas LMS":"instructure.com", "LinkedIn Learning":"linkedin.com",
+  "Take-Two":"take2games.com", "Ben & Jerry's":"benjerry.com",
+  "In-N-Out":"in-n-out.com", "Blue Bottle":"bluebottlecoffee.com",
+  "The New York Times":"nytimes.com", "Wall Street Journal":"wsj.com",
+  "Financial Times":"ft.com", "The Economist":"economist.com",
+  "Associated Press":"ap.org", "Google Cloud":"cloud.google.com",
+  "Google DeepMind":"deepmind.google", "Hugging Face":"huggingface.co",
+  "Stability AI":"stability.ai", "Mistral AI":"mistral.ai",
+  "Together AI":"together.ai", "Nike Run Club":"nike.com",
+  "Map My Run":"mapmyrun.com", "Rolls-Royce":"rolls-royce.com",
+  "Bell Canada":"bell.ca", "Costa Coffee":"costa.co.uk",
+};
+function brandDomain(name){
+  if (DOMAIN_OVERRIDES[name]) return DOMAIN_OVERRIDES[name];
+  if (/\.(com|net|org|io|ai|app|co)$/i.test(name)) return name.toLowerCase();
+  return name.normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .toLowerCase().replace(/[^a-z0-9]/g,'') + '.com';
+}
+
+const logoTip = document.createElement('div');
+logoTip.id = 'logo-tip';
+logoTip.innerHTML = '<img alt=""><span></span>';
+document.body.appendChild(logoTip);
+const tipImg = logoTip.querySelector('img');
+const tipName = logoTip.querySelector('span');
+let tipBrand = null;
+
+// duckduckgo icons are higher-res; google's favicon service is the fallback.
+// both 404 on unknown domains, so a bad guess ends at onerror and the tip stays hidden.
+tipImg.addEventListener('load', () => { if (tipBrand) logoTip.classList.add('on'); });
+tipImg.addEventListener('error', () => {
+  if (!tipBrand) return;
+  if (tipImg.dataset.stage === 'ddg') {
+    tipImg.dataset.stage = 'google';
+    tipImg.src = `https://www.google.com/s2/favicons?domain=${brandDomain(tipBrand)}&sz=128`;
+  } else {
+    logoTip.classList.remove('on');
+  }
+});
+
+function moveTip(e){
+  const pad = 14, r = logoTip.getBoundingClientRect();
+  let x = e.clientX + pad, y = e.clientY + pad;
+  if (x + r.width > innerWidth - 8) x = e.clientX - r.width - pad;
+  if (y + r.height > innerHeight - 8) y = e.clientY - r.height - pad;
+  logoTip.style.left = x + 'px';
+  logoTip.style.top = y + 'px';
+}
+
+document.addEventListener('mouseover', e => {
+  const el = e.target.closest ? e.target.closest('[data-brand]') : null;
+  if (!el) {
+    if (tipBrand) { tipBrand = null; logoTip.classList.remove('on'); }
+    return;
+  }
+  const brand = el.dataset.brand;
+  if (brand === tipBrand) return;
+  tipBrand = brand;
+  tipName.textContent = brand;
+  logoTip.classList.remove('on');
+  tipImg.dataset.stage = 'ddg';
+  tipImg.src = `https://icons.duckduckgo.com/ip3/${brandDomain(brand)}.ico`;
+});
+document.addEventListener('mousemove', e => { if (tipBrand) moveTip(e); });
 </script>
 </body>
 </html>

@@ -1508,6 +1508,18 @@ function siSlug(name){
   return name.normalize('NFD').replace(/[̀-ͯ]/g,'')
     .toLowerCase().replace(/[^a-z0-9]/g,'');
 }
+// Simple Icons renders every mark in one flat color, which butchers multicolor
+// logos (American Airlines' red+blue eagle, Google's G). Brands whose palette
+// spans 2+ hues start at the favicon stage instead, keeping the real colors.
+const MULTI_HUE = {};
+brands.forEach(b => {
+  const hues = new Set();
+  b.colors.forEach(c => {
+    const [h,s,l] = hexToHsl(c.hex);
+    if (s >= 0.12 && l >= 0.15 && l <= 0.95) hues.add(Math.round(h/30) % 12);
+  });
+  if (hues.size >= 2) MULTI_HUE[b.name] = true;
+});
 tipImg.addEventListener('load', () => { if (tipBrand) logoTip.classList.add('on'); });
 tipImg.addEventListener('error', () => {
   if (!tipBrand) return;
@@ -1543,8 +1555,15 @@ document.addEventListener('mouseover', e => {
   tipBrand = brand;
   tipName.textContent = brand;
   logoTip.classList.remove('on');
-  tipImg.dataset.stage = 'si';
-  tipImg.src = `https://cdn.simpleicons.org/${siSlug(brand)}`;
+  if (MULTI_HUE[brand]) {
+    const dom = brandDomain(brand);
+    if (!dom) return;
+    tipImg.dataset.stage = 'ddg';
+    tipImg.src = `https://icons.duckduckgo.com/ip3/${dom}.ico`;
+  } else {
+    tipImg.dataset.stage = 'si';
+    tipImg.src = `https://cdn.simpleicons.org/${siSlug(brand)}`;
+  }
 });
 document.addEventListener('mousemove', e => { if (tipBrand) moveTip(e); });
 </script>

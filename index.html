@@ -1439,26 +1439,47 @@ sortedBrands.forEach(b => {
 function escAttr(s){ return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;'); }
 
 const DOMAIN_OVERRIDES = {
-  "HBO Max":"max.com", "Apple Music":"apple.com", "Apple Health":"apple.com",
-  "Cash App":"cash.app", "Shopify Plus":"shopify.com",
-  "Delta Airlines":"delta.com", "United Airlines":"united.com",
-  "American Airlines":"aa.com", "Southwest Airlines":"southwest.com",
-  "Singapore Airlines":"singaporeair.com", "Hyatt Hotels":"hyatt.com",
-  "Arc Browser":"arc.net", "Khan Academy":"khanacademy.org",
-  "Canvas LMS":"instructure.com", "LinkedIn Learning":"linkedin.com",
-  "Take-Two":"take2games.com", "Ben & Jerry's":"benjerry.com",
-  "In-N-Out":"in-n-out.com", "Blue Bottle":"bluebottlecoffee.com",
-  "The New York Times":"nytimes.com", "Wall Street Journal":"wsj.com",
-  "Financial Times":"ft.com", "The Economist":"economist.com",
-  "Associated Press":"ap.org", "Google Cloud":"cloud.google.com",
-  "Google DeepMind":"deepmind.google", "Hugging Face":"huggingface.co",
-  "Stability AI":"stability.ai", "Mistral AI":"mistral.ai",
-  "Together AI":"together.ai", "Nike Run Club":"nike.com",
-  "Map My Run":"mapmyrun.com", "Rolls-Royce":"rolls-royce.com",
-  "Bell Canada":"bell.ca", "Costa Coffee":"costa.co.uk",
+  "7-Eleven":"7-eleven.com", "Airtel":"airtel.in", "American Airlines":"aa.com",
+  "Apple Health":null, "Apple Music":"music.apple.com", "Arc Browser":"arc.net",
+  "Associated Press":"ap.org", "AWS":"aws.amazon.com", "Azure":"azure.microsoft.com",
+  "Behance":"behance.net", "Bell Canada":"bell.ca", "Ben & Jerry's":"benjerry.com",
+  "Bentley":"bentleymotors.com", "Bethesda":"bethesda.net", "Bird":"bird.co",
+  "Blue Bottle":"bluebottlecoffee.com", "Bluesky":"bsky.app", "Bolt":"bolt.eu",
+  "Brilliant":"brilliant.org", "Canvas LMS":"instructure.com", "Cash App":"cash.app",
+  "China Mobile":"10086.cn", "Confluence":"confluence.atlassian.com", "Costa Coffee":"costa.co.uk",
+  "Coursera":"coursera.org", "Cruise":"getcruise.com", "Datadog":"datadoghq.com",
+  "Delta Airlines":"delta.com", "Deutsche Telekom":"telekom.com", "Disney+":"disneyplus.com",
+  "Dunkin'":"dunkindonuts.com", "edX":"edx.org", "Elastic":"elastic.co",
+  "ElevenLabs":"elevenlabs.io", "Ferrero":"www.ferrero.com", "Financial Times":"ft.com",
+  "Garena":"intl.garena.com", "Go":"go.dev", "Google Cloud":"cloud.google.com",
+  "Google DeepMind":"deepmind.google", "HBO Max":"hbomax.com", "Heineken":"www.heineken.com",
+  "Hugging Face":"huggingface.co", "Hyatt Hotels":"hyatt.com", "iHeartRadio":"iheart.com",
+  "In-N-Out":"in-n-out.com", "Inflection":"inflection.ai", "InVision":"invisionapp.com",
+  "Jasper":"jasper.ai", "Khan Academy":"khanacademy.org", "Kubernetes":"kubernetes.io",
+  "Li Auto":"lixiang.com", "Lime":"li.me", "Lindt":"lindtusa.com",
+  "Line":"line.me", "Linear":"linear.app", "LinkedIn Learning":"linkedin.com",
+  "Linode/Akamai":"linode.com", "Lucid":"lucidmotors.com", "Map My Run":"mapmyrun.com",
+  "Mars":"www.mars.com", "Mastodon":"joinmastodon.org", "Mercedes-Benz":"mercedes-benz.com",
+  "Mistral AI":"mistral.ai", "Modelo":"modelousa.com", "Nando's":"nandos.co.uk",
+  "Nike Run Club":"nike.com", "Nissan":"nissanusa.com", "npm":"npmjs.com",
+  "Omega":"omegawatches.com", "Oura":"ouraring.com", "Pandora Jewelry":"pandora.net",
+  "Panera":"panerabread.com", "Paramount+":"paramountplus.com", "Peacock":"peacocktv.com",
+  "Peloton":"onepeloton.com", "Perplexity":"perplexity.ai", "Python":"python.org",
+  "Redis":"redis.io", "Ro":"ro.co", "Rolls-Royce":"rolls-roycemotorcars.com",
+  "Ross":"rossstores.com", "Runway":"runwayml.com", "Rust":"rust-lang.org",
+  "Safari":"apple.com", "Sentry":"sentry.io", "Shopify Plus":"shopify.com",
+  "Signal":"signal.org", "Singapore Airlines":"singaporeair.com", "Southwest Airlines":"southwest.com",
+  "Square":"squareup.com", "Square Enix":"square-enix-games.com", "Stability AI":"stability.ai",
+  "Steam":"steampowered.com", "T-Mobile":"t-mobile.com", "Take-Two":"take2games.com",
+  "Telegram":"telegram.org", "Telstra":"telstra.com.au", "Terraform":"terraform.io",
+  "The Economist":"economist.com", "The New York Times":"nytimes.com", "Together AI":"together.ai",
+  "Turso":"turso.tech", "Twitch":"twitch.tv", "Twitter/X":"x.com",
+  "United Airlines":"united.com", "Valve":"valvesoftware.com", "Wall Street Journal":"wsj.com",
+  "Whole Foods":"wholefoodsmarket.com", "xAI":"x.ai",
 };
 function brandDomain(name){
-  if (DOMAIN_OVERRIDES[name]) return DOMAIN_OVERRIDES[name];
+  // null override = brand has no site of its own; show no logo rather than a wrong one
+  if (name in DOMAIN_OVERRIDES) return DOMAIN_OVERRIDES[name];
   if (/\.(com|net|org|io|ai|app|co)$/i.test(name)) return name.toLowerCase();
   return name.normalize('NFD').replace(/[\u0300-\u036f]/g,'')
     .toLowerCase().replace(/[^a-z0-9]/g,'') + '.com';
@@ -1505,8 +1526,10 @@ document.addEventListener('mouseover', e => {
   tipBrand = brand;
   tipName.textContent = brand;
   logoTip.classList.remove('on');
+  const dom = brandDomain(brand);
+  if (!dom) return;
   tipImg.dataset.stage = 'ddg';
-  tipImg.src = `https://icons.duckduckgo.com/ip3/${brandDomain(brand)}.ico`;
+  tipImg.src = `https://icons.duckduckgo.com/ip3/${dom}.ico`;
 });
 document.addEventListener('mousemove', e => { if (tipBrand) moveTip(e); });
 </script>

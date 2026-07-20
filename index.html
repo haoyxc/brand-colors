@@ -1570,7 +1570,11 @@ document.addEventListener('mouseover', e => {
   tipBrand = brand;
   tipName.textContent = brand;
   logoTip.classList.remove('on');
-  if (MULTI_HUE[brand]) {
+  // Inside a hue-bin row the mark must show THAT color, so a tinted Simple
+  // Icons mark beats even a multicolor favicon there (an orange favicon under
+  // the blue wedge misleads). Elsewhere, multicolor brands keep their favicon.
+  const ctxTint = el.dataset.logoColor;
+  if (MULTI_HUE[brand] && !ctxTint) {
     const dom = brandDomain(brand);
     if (!dom) return;
     tipImg.dataset.stage = 'ddg';
@@ -1579,7 +1583,7 @@ document.addEventListener('mouseover', e => {
     // tint the mark to match its context: the hovered hue-bin row's color,
     // else the brand's own dominant color ("Anthropic in orange gets the
     // orange version"). Neutral-only brands keep the default mark.
-    const tint = el.dataset.logoColor || DOM_COLOR[brand];
+    const tint = ctxTint || DOM_COLOR[brand];
     const [, ts, tl] = tint ? hexToHsl(tint) : [0, 0, 0];
     const suffix = tint && ts >= 0.12 && tl >= 0.15 && tl <= 0.95 ? '/' + tint.slice(1) : '';
     tipImg.dataset.stage = 'si';

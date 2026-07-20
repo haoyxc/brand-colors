@@ -1379,7 +1379,7 @@ function buildRose(roseEl, panelEl, colors, brandsCount, opts = {}){
           ${entries.map(([brand, cs]) => {
             const top = cs[0];
             return `
-              <div class="rp-item" data-brand="${escAttr(brand)}">
+              <div class="rp-item" data-brand="${escAttr(brand)}" data-logo-color="${top.hex}">
                 <div class="sw" style="background:${top.hex}"></div>
                 <div class="nm">${brand}</div>
                 <div class="hx">${top.hex}</div>
@@ -1442,48 +1442,54 @@ sortedBrands.forEach(b => {
 function escAttr(s){ return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;'); }
 
 const DOMAIN_OVERRIDES = {
-  "7-Eleven":"7-eleven.com", "Affinity":"affinity.serif.com", "Airtel":"airtel.in",
-  "American Airlines":"aa.com", "Apple Health":null, "Apple Music":"music.apple.com",
-  "Arc Browser":"arc.net", "Associated Press":"ap.org", "AWS":"aws.amazon.com",
-  "Azure":"azure.microsoft.com", "Behance":"behance.net", "Bell Canada":"bell.ca",
+  "7-Eleven":"7-eleven.com", "Adobe":"helpx.adobe.com", "Affinity":"affinity.serif.com",
+  "Airtel":"airtel.in", "Aldi":"aldi.us", "American Airlines":"aadvantageshopping.com",
+  "Apple Health":null, "Apple Music":"music.apple.com", "Arc Browser":"arc.net",
+  "Associated Press":"ap.org", "AWS":"docs.aws.amazon.com", "Azure":"azure.microsoft.com",
+  "Baskin-Robbins":"baskinrobbins.com.au", "Behance":"behance.net", "Bell Canada":"bell.ca",
   "Ben & Jerry's":"benjerry.com", "Bentley":"bentleymotors.com", "Bethesda":"bethesda.net",
   "Bird":"bird.co", "Blender":"blender.org", "Blue Bottle":"bluebottlecoffee.com",
-  "Bluesky":"bsky.app", "Bolt":"bolt.eu", "Brilliant":"brilliant.org",
-  "Canadian Tire":"canadiantire.ca", "Canvas LMS":"instructure.com", "Cash App":"cash.app",
+  "Bluesky":"bsky.app", "Bolt":"food.bolt.eu", "Brilliant":"brilliant.org",
+  "Canadian Tire":"canadiantire.ca", "Canvas LMS":"canvas.instructure.com", "Cash App":"cash.app",
   "China Mobile":"10086.cn", "Confluence":"confluence.atlassian.com", "Costa Coffee":"costa.co.uk",
   "Coursera":"coursera.org", "Cruise":"getcruise.com", "Datadog":"datadoghq.com",
   "Deliveroo":"deliveroo.co.uk", "Delta Airlines":"delta.com", "Deutsche Telekom":"telekom.com",
-  "Disney+":"disneyplus.com", "Dunkin'":"dunkindonuts.com", "edX":"edx.org",
-  "Elastic":"elastic.co", "ElevenLabs":"elevenlabs.io", "Ferrero":"www.ferrero.com",
-  "Financial Times":"ft.com", "Firebase":"firebase.google.com", "Flo":"flo.health",
-  "Garena":"intl.garena.com", "Go":"go.dev", "Google Cloud":"cloud.google.com",
+  "Disney+":"disneyplus.com", "Dollar General":"newscenter.dollargeneral.com", "Dunkin'":"dunkindonuts.com",
+  "edX":"edx.org", "Elastic":"elastic.co", "ElevenLabs":"elevenlabs.io",
+  "Ferrari":"store.ferrari.com", "Ferrero":"www.ferrero.com", "Fila":"fila.co.uk",
+  "Financial Times":"markets.ft.com", "Firebase":"firebase.google.com", "Five Guys":"order.fiveguys.com",
+  "Flipkart":"www.flipkart.com", "Flo":"flo.health", "Fossil":"www.fossil.com",
+  "Garena":"intl.garena.com", "Go":"go.dev", "Google Cloud":"console.cloud.google.com",
   "Google DeepMind":"deepmind.google", "Google Gemini":"gemini.google.com", "HBO Max":"hbomax.com",
   "Heineken":"www.heineken.com", "Hugging Face":"huggingface.co", "Hyatt Hotels":"hyatt.com",
-  "iHeartRadio":"iheart.com", "In-N-Out":"in-n-out.com", "Inflection":"inflection.ai",
-  "InVision":"invisionapp.com", "Jasper":"jasper.ai", "Khan Academy":"khanacademy.org",
+  "IBM":"cloud.ibm.com", "iHeartRadio":"iheart.com", "In-N-Out":"locations.in-n-out.com",
+  "Inflection":"inflection.ai", "InVision":"invisionapp.com", "Jasper":"jasper.ai",
+  "JD.com":"joybuy.com", "JetBrains":"blog.jetbrains.com", "Khan Academy":"khanacademy.org",
   "Kubernetes":"kubernetes.io", "Last.fm":"last.fm", "Levi's":"levi.com",
   "Li Auto":"lixiang.com", "Lime":"li.me", "Lindt":"lindtusa.com",
   "Line":"line.me", "Linear":"linear.app", "LinkedIn Learning":"linkedin.com",
   "Linode/Akamai":"linode.com", "Lucid":"lucidmotors.com", "Map My Run":"mapmyrun.com",
   "Mars":"www.mars.com", "Mastodon":"joinmastodon.org", "Mercedes-Benz":"mercedes-benz.com",
-  "Mistral AI":"mistral.ai", "Modelo":"modelousa.com", "Nando's":"nandos.co.uk",
-  "Nickelodeon":"nick.com", "Nike Run Club":"nike.com", "Nissan":"nissanusa.com",
-  "npm":"npmjs.com", "Omega":"omegawatches.com", "Oura":"ouraring.com",
-  "Pandora Jewelry":"pandora.net", "Panera":"panerabread.com", "Paramount+":"paramountplus.com",
-  "Peacock":"peacocktv.com", "Peloton":"onepeloton.com", "Perplexity":"perplexity.ai",
-  "Python":"python.org", "Redis":"redis.io", "Ro":"ro.co",
-  "Rolls-Royce":"rolls-roycemotorcars.com", "Ross":"rossstores.com", "Runway":"runwayml.com",
-  "Rust":"rust-lang.org", "Safari":"apple.com", "Sainsbury's":"sainsburys.co.uk",
-  "Scratch":"scratch.mit.edu", "Sentry":"sentry.io", "Shopify Plus":"shopify.com",
-  "Signal":"signal.org", "Singapore Airlines":"singaporeair.com", "Škoda":"skoda-auto.com",
-  "Southwest Airlines":"southwest.com", "Square":"squareup.com", "Square Enix":"square-enix-games.com",
-  "Stability AI":"stability.ai", "Steam":"steampowered.com", "T-Mobile":"t-mobile.com",
-  "Take-Two":"take2games.com", "Telegram":"telegram.org", "Telstra":"telstra.com.au",
-  "Terraform":"terraform.io", "The Economist":"economist.com", "The New York Times":"nytimes.com",
-  "Together AI":"together.ai", "Turso":"turso.tech", "Twitch":"twitch.tv",
-  "Twitter/X":"x.com", "United Airlines":"united.com", "United Colors of Benetton":"benetton.com",
-  "Valve":"valvesoftware.com", "Vite":"vite.dev", "Wall Street Journal":"wsj.com",
-  "Whole Foods":"wholefoodsmarket.com", "xAI":"x.ai", "Zelle":"zellepay.com",
+  "Mistral AI":"mistral.ai", "Modelo":"modelousa.com", "MTN":"mtn.ng",
+  "Nando's":"nandos.co.uk", "Nickelodeon":"nick.com", "Nike Run Club":"nike.com",
+  "Nissan":"nissanusa.com", "npm":"npmjs.com", "Omega":"omegawatches.com",
+  "Oura":"ouraring.com", "Pandora Jewelry":"pandora.net", "Panera":"panerabread.com",
+  "Paramount+":"paramountplus.com", "Peacock":"peacocktv.com", "Peloton":"onepeloton.com",
+  "Perplexity":"perplexity.ai", "Pokémon":"corporate.pokemon.com", "Python":"python.org",
+  "Redis":"redis.io", "Ro":"ro.co", "Rolls-Royce":"rolls-roycemotorcars.com",
+  "Ross":"rossstores.com", "Runway":"runwayml.com", "Rust":"rust-lang.org",
+  "Safari":"webkit.org", "Sainsbury's":"sainsburys.co.uk", "Scratch":"scratch.mit.edu",
+  "Sentry":"sentry.io", "Shopify Plus":"shopify.com", "Signal":"signal.org",
+  "Singapore Airlines":"singaporeair.com", "Škoda":"skoda-auto.com", "Southwest Airlines":"southwest.com",
+  "Square":"squareup.com", "Square Enix":"square-enix-games.com", "Stability AI":"stability.ai",
+  "Steam":"steampowered.com", "Swiggy":"blog.swiggy.com", "T-Mobile":"t-mobile.com",
+  "Take-Two":"take2games.com", "Telegram":"telegram.org", "Telia":"telia.fi",
+  "Telstra":"telstra.com.au", "Terraform":"terraform.io", "The Economist":"economist.com",
+  "The New York Times":"nytimes.com", "Together AI":"together.ai", "Turso":"turso.tech",
+  "Twitch":"twitch.tv", "Twitter/X":"x.com", "United Airlines":"united.com",
+  "United Colors of Benetton":"benetton.com", "Valve":"valvesoftware.com", "Vite":"vite.dev",
+  "Wall Street Journal":"wsj.com", "Whole Foods":"wholefoodsmarket.com", "xAI":"x.ai",
+  "XPeng":"xiaopeng.com", "Zelle":"zellepay.com",
 };
 function brandDomain(name){
   // null override = brand has no site of its own; show no logo rather than a wrong one
@@ -1512,13 +1518,20 @@ function siSlug(name){
 // logos (American Airlines' red+blue eagle, Google's G). Brands whose palette
 // spans 2+ hues start at the favicon stage instead, keeping the real colors.
 const MULTI_HUE = {};
+// each brand's most saturated non-neutral color — the default tint for its mark
+const DOM_COLOR = {};
 brands.forEach(b => {
   const hues = new Set();
+  let best = null, bestS = 0.12;
   b.colors.forEach(c => {
     const [h,s,l] = hexToHsl(c.hex);
-    if (s >= 0.12 && l >= 0.15 && l <= 0.95) hues.add(Math.round(h/30) % 12);
+    if (s >= 0.12 && l >= 0.15 && l <= 0.95) {
+      hues.add(Math.round(h/30) % 12);
+      if (s > bestS) { bestS = s; best = c.hex; }
+    }
   });
   if (hues.size >= 2) MULTI_HUE[b.name] = true;
+  if (best) DOM_COLOR[b.name] = best;
 });
 tipImg.addEventListener('load', () => { if (tipBrand) logoTip.classList.add('on'); });
 tipImg.addEventListener('error', () => {
@@ -1561,8 +1574,14 @@ document.addEventListener('mouseover', e => {
     tipImg.dataset.stage = 'ddg';
     tipImg.src = `https://icons.duckduckgo.com/ip3/${dom}.ico`;
   } else {
+    // tint the mark to match its context: the hovered hue-bin row's color,
+    // else the brand's own dominant color ("Anthropic in orange gets the
+    // orange version"). Neutral-only brands keep the default mark.
+    const tint = el.dataset.logoColor || DOM_COLOR[brand];
+    const [, ts, tl] = tint ? hexToHsl(tint) : [0, 0, 0];
+    const suffix = tint && ts >= 0.12 && tl >= 0.15 && tl <= 0.95 ? '/' + tint.slice(1) : '';
     tipImg.dataset.stage = 'si';
-    tipImg.src = `https://cdn.simpleicons.org/${siSlug(brand)}`;
+    tipImg.src = `https://cdn.simpleicons.org/${siSlug(brand)}${suffix}`;
   }
 });
 document.addEventListener('mousemove', e => { if (tipBrand) moveTip(e); });

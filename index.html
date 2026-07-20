@@ -1501,14 +1501,23 @@ const tipImg = logoTip.querySelector('img');
 const tipName = logoTip.querySelector('span');
 let tipBrand = null;
 
-// duckduckgo icons are higher-res; google's favicon service is the fallback.
-// both 404 on unknown domains, so a bad guess ends at onerror and the tip stays hidden.
+// logo sources, best first: Simple Icons serves real brand marks (SVG, official
+// color); duckduckgo/google favicons fill the gaps. All 404 on a miss, so each
+// failure falls through to the next stage and a total miss keeps the tip hidden.
+function siSlug(name){
+  return name.normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .toLowerCase().replace(/[^a-z0-9]/g,'');
+}
 tipImg.addEventListener('load', () => { if (tipBrand) logoTip.classList.add('on'); });
 tipImg.addEventListener('error', () => {
   if (!tipBrand) return;
-  if (tipImg.dataset.stage === 'ddg') {
+  const dom = brandDomain(tipBrand);
+  if (tipImg.dataset.stage === 'si' && dom) {
+    tipImg.dataset.stage = 'ddg';
+    tipImg.src = `https://icons.duckduckgo.com/ip3/${dom}.ico`;
+  } else if (tipImg.dataset.stage === 'ddg' && dom) {
     tipImg.dataset.stage = 'google';
-    tipImg.src = `https://www.google.com/s2/favicons?domain=${brandDomain(tipBrand)}&sz=128`;
+    tipImg.src = `https://www.google.com/s2/favicons?domain=${dom}&sz=128`;
   } else {
     logoTip.classList.remove('on');
   }
@@ -1534,10 +1543,8 @@ document.addEventListener('mouseover', e => {
   tipBrand = brand;
   tipName.textContent = brand;
   logoTip.classList.remove('on');
-  const dom = brandDomain(brand);
-  if (!dom) return;
-  tipImg.dataset.stage = 'ddg';
-  tipImg.src = `https://icons.duckduckgo.com/ip3/${dom}.ico`;
+  tipImg.dataset.stage = 'si';
+  tipImg.src = `https://cdn.simpleicons.org/${siSlug(brand)}`;
 });
 document.addEventListener('mousemove', e => { if (tipBrand) moveTip(e); });
 </script>

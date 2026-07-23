@@ -269,7 +269,7 @@ const brands = [
   { name:"Sprout Social", industry:"Marketing", colors:[{name:"Green",hex:"#59CB59"},{name:"Dark",hex:"#293340"},{name:"White",hex:"#FFFFFF"}]},
   { name:"Later", industry:"Marketing", colors:[{name:"Black",hex:"#000000"},{name:"Cream",hex:"#F8F2EA"}]},
   { name:"Semrush", industry:"Marketing", colors:[{name:"Orange",hex:"#FF642D"},{name:"Dark",hex:"#1A1A1A"},{name:"White",hex:"#FFFFFF"}]},
-  { name:"Ahrefs", industry:"Marketing", colors:[{name:"Blue",hex:"#1166EE"},{name:"Orange",hex:"#FF6C00"},{name:"Dark",hex:"#1A1A1A"},{name:"White",hex:"#FFFFFF"}]},
+  { name:"Ahrefs", industry:"Marketing", colors:[{name:"Orange",hex:"#FF6C00"},{name:"Dark",hex:"#1A1A1A"},{name:"White",hex:"#FFFFFF"}]},
   { name:"Moz", industry:"Marketing", colors:[{name:"Blue",hex:"#1779BA"},{name:"Dark",hex:"#1A1A1A"},{name:"White",hex:"#FFFFFF"}]},
   // === Education ===
   { name:"Duolingo", industry:"Education", colors:[{name:"Feather Green",hex:"#58CC02"},{name:"Mask Green",hex:"#89E219"},{name:"Macaw Blue",hex:"#1CB0F6"},{name:"Fox Orange",hex:"#FF9600"}]},

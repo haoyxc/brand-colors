@@ -966,7 +966,7 @@ const INDUSTRIES = Object.keys(BY_IND);
 // ───── histograms ─────
 // near-black colors (UPS brown, very dark roasts) read as neutral to the eye
 // even when their hue is technically red/orange — keep them out of the hue wedges
-function isNeutral(c){ return c.s < 0.12 || c.l < 0.15; }
+function isNeutral(c){ return c.s < 0.12 || c.l < 0.2; }
 function histogram(colors){
   const bins = new Array(12).fill(0);
   let gray = 0;
@@ -1445,7 +1445,7 @@ const DOMAIN_OVERRIDES = {
   "7-Eleven":"7-eleven.com", "Adobe":"helpx.adobe.com", "Affinity":"affinity.serif.com",
   "Airtel":"airtel.in", "Aldi":"aldi.us", "American Airlines":"aa.com",
   "Apple Health":null, "Apple Music":"music.apple.com", "Arc Browser":"arc.net",
-  "Associated Press":"ap.org", "AWS":"docs.aws.amazon.com", "Azure":"azure.microsoft.com",
+  "Associated Press":"ap.org", "AWS":"docs.aws.amazon.com", "Azure":"portal.azure.com",
   "Bandai Namco":"bandainamcoent.com", "Baskin-Robbins":"baskinrobbins.com.au", "Behance":"behance.net",
   "Bell Canada":"bell.ca", "Ben & Jerry's":"benjerry.com", "Bentley":"bentleymotors.com",
   "Bethesda":"bethesda.net", "Bird":"bird.co", "Blender":"blender.org",
@@ -1472,13 +1472,13 @@ const DOMAIN_OVERRIDES = {
   "Linode/Akamai":"linode.com", "Lucid":"lucidmotors.com", "Lufthansa":"lufthansacargo.com",
   "Map My Run":"mapmyrun.com", "Mars":"www.mars.com", "Mastodon":"joinmastodon.org",
   "Mercedes-Benz":"mercedes-benz.com", "Mistral AI":"mistral.ai", "Modelo":"modelousa.com",
-  "MTN":"mtn.ng", "Nando's":"nandos.co.uk", "Nickelodeon":"nick.com",
+  "MTN":"mtn.com", "Nando's":"nandos.co.uk", "Nickelodeon":"nick.com",
   "Nike Run Club":"nike.com", "NIO":"nio.io", "Nissan":"nissanusa.com",
   "npm":"npmjs.com", "Omega":"omegawatches.com", "Oura":"ouraring.com",
   "Pandora Jewelry":"pandora.net", "Panera":"panerabread.com", "Paramount+":"paramountplus.com",
   "Peacock":"peacocktv.com", "Peloton":"onepeloton.com", "Perplexity":"perplexity.ai",
   "Pokémon":"corporate.pokemon.com", "Python":"python.org", "Redis":"redis.io",
-  "Rivian":"stories.rivian.com", "Ro":"ro.co", "Rolls-Royce":"rolls-roycemotorcars.com",
+  "Rivian":"rivian.com", "Ro":"ro.co", "Rolls-Royce":"rolls-roycemotorcars.com",
   "Ross":"rossstores.com", "Runway":"runwayml.com", "Rust":"rust-lang.org",
   "Safari":"webkit.org", "Sainsbury's":"sainsburys.co.uk", "Scratch":"scratch.mit.edu",
   "Sentry":"sentry.io", "Shopify Plus":"shopify.com", "Signal":"signal.org",
@@ -1512,7 +1512,11 @@ let tipBrand = null;
 // logo sources, best first: Simple Icons serves real brand marks (SVG, official
 // color); duckduckgo/google favicons fill the gaps. All 404 on a miss, so each
 // failure falls through to the next stage and a total miss keeps the tip hidden.
+// slugs that collide with a DIFFERENT company's Simple Icons mark — force the
+// 404 so the chain falls through to the brand's real favicon instead
+const SI_SKIP = { "Hermès": true, "Vox": true, "Axios": true };
 function siSlug(name){
+  if (SI_SKIP[name]) return 'no-mark-collision';
   return name.normalize('NFD').replace(/[̀-ͯ]/g,'')
     .toLowerCase().replace(/[^a-z0-9]/g,'');
 }
@@ -1527,7 +1531,7 @@ brands.forEach(b => {
   let best = null, bestS = 0.12;
   b.colors.forEach(c => {
     const [h,s,l] = hexToHsl(c.hex);
-    if (s >= 0.12 && l >= 0.15 && l <= 0.95) {
+    if (s >= 0.12 && l >= 0.2 && l <= 0.95) {
       hues.add(Math.round(h/30) % 12);
       if (s > bestS) { bestS = s; best = c.hex; }
     }
@@ -1583,9 +1587,12 @@ document.addEventListener('mouseover', e => {
     // tint the mark to match its context: the hovered hue-bin row's color,
     // else the brand's own dominant color ("Anthropic in orange gets the
     // orange version"). Neutral-only brands keep the default mark.
-    const tint = ctxTint || DOM_COLOR[brand];
+    // Multicolor brands are never tinted — recoloring a red+blue eagle or the
+    // golden arches fabricates a logo that doesn't exist; Simple Icons'
+    // default is the mark's real official color.
+    const tint = MULTI_HUE[brand] ? null : (ctxTint || DOM_COLOR[brand]);
     const [, ts, tl] = tint ? hexToHsl(tint) : [0, 0, 0];
-    const suffix = tint && ts >= 0.12 && tl >= 0.15 && tl <= 0.95 ? '/' + tint.slice(1) : '';
+    const suffix = tint && ts >= 0.12 && tl >= 0.2 && tl <= 0.95 ? '/' + tint.slice(1) : '';
     tipImg.dataset.stage = 'si';
     tipImg.src = `https://cdn.simpleicons.org/${siSlug(brand)}${suffix}`;
   }

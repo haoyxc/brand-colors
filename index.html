@@ -918,7 +918,7 @@
 <div id="detail-view" style="display:none"></div>
 
 <div class="colophon">
-  <span class="side"><em>Data drawn from</em> brandcolors.net &middot; 590 brands, 23 industries, one long afternoon of HSL.</span>
+  <span class="side"><em>Data drawn from</em> brandcolors.net &middot; 590 brands, 23 industries, one long afternoon of HSL. Palettes and logos are best-effort, not official brand guidelines &mdash; expect the occasional wrong shade.</span>
   <span class="mono-side">Set in Fraunces &amp; JetBrains Mono</span>
 </div>
 
@@ -1442,6 +1442,7 @@ sortedBrands.forEach(b => {
 function escAttr(s){ return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;'); }
 
 const DOMAIN_OVERRIDES = {
+  "Mojang":null,
   "7-Eleven":"7-eleven.com", "Adobe":"helpx.adobe.com", "Affinity":"affinity.serif.com",
   "Airtel":"airtel.in", "Aldi":"aldi.us", "American Airlines":"aa.com",
   "Apple Health":null, "Apple Music":"music.apple.com", "Arc Browser":"arc.net",

@@ -1515,7 +1515,12 @@ let tipBrand = null;
 // failure falls through to the next stage and a total miss keeps the tip hidden.
 // slugs that collide with a DIFFERENT company's Simple Icons mark — force the
 // 404 so the chain falls through to the brand's real favicon instead
-const SI_SKIP = { "Hermès": true, "Vox": true, "Axios": true };
+const SI_SKIP = {
+  "Hermès": true, "Vox": true, "Axios": true, "Fitbit": true, "McLaren": true,
+  "Scratch": true, "Instacart": true, "DHL": true, "British Airways": true,
+  "Okta": true, "Auth0": true, "Intercom": true, "Mailchimp": true,
+  "Pluralsight": true, "Unity": true, "Supercell": true, "AMD": true, "Sony": true,
+};
 function siSlug(name){
   if (SI_SKIP[name]) return 'no-mark-collision';
   return name.normalize('NFD').replace(/[̀-ͯ]/g,'')
@@ -1585,17 +1590,10 @@ document.addEventListener('mouseover', e => {
     tipImg.dataset.stage = 'ddg';
     tipImg.src = `https://icons.duckduckgo.com/ip3/${dom}.ico`;
   } else {
-    // tint the mark to match its context: the hovered hue-bin row's color,
-    // else the brand's own dominant color ("Anthropic in orange gets the
-    // orange version"). Neutral-only brands keep the default mark.
-    // Multicolor brands are never tinted — recoloring a red+blue eagle or the
-    // golden arches fabricates a logo that doesn't exist; Simple Icons'
-    // default is the mark's real official color.
-    const tint = MULTI_HUE[brand] ? null : (ctxTint || DOM_COLOR[brand]);
-    const [, ts, tl] = tint ? hexToHsl(tint) : [0, 0, 0];
-    const suffix = tint && ts >= 0.12 && tl >= 0.2 && tl <= 0.95 ? '/' + tint.slice(1) : '';
+    // never tint: a recolored mark is a logo that doesn't exist. Simple Icons'
+    // default fill is the mark's real official color.
     tipImg.dataset.stage = 'si';
-    tipImg.src = `https://cdn.simpleicons.org/${siSlug(brand)}${suffix}`;
+    tipImg.src = `https://cdn.simpleicons.org/${siSlug(brand)}`;
   }
 });
 document.addEventListener('mousemove', e => { if (tipBrand) moveTip(e); });
